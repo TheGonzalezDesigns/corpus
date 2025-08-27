@@ -1,3 +1,6 @@
 [submodule "capabilities/speech"]
 	path = capabilities/speech
 	url = git@github.com:TheGonzalezDesigns/corpus-speech.git
+[submodule "capabilities/vision"]
+	path = capabilities/vision
+	url = git@github.com:TheGonzalezDesigns/corpus-vision.git
