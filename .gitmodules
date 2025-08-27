@@ -1,0 +1,3 @@
+[submodule "capabilities/speech"]
+	path = capabilities/speech
+	url = git@github.com:TheGonzalezDesigns/corpus-speech.git
