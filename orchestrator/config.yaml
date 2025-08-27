@@ -1,0 +1,22 @@
+capabilities:
+  speech:
+    url: "http://localhost:5001"
+    enabled: true
+  vision:
+    url: "http://localhost:5002"
+    enabled: false  # Not implemented yet
+  audio:
+    url: "http://localhost:5003"
+    enabled: false  # Not implemented yet
+  brain:
+    url: "http://localhost:5004"
+    enabled: false  # Not implemented yet
+
+orchestrator:
+  host: "0.0.0.0"
+  port: 5000
+  health_check_interval: 30  # seconds
+
+logging:
+  level: "INFO"
+  file: "corpus.log"

@@ -1,0 +1,10 @@
+{
+    "mcpServers": {
+        "wide-search": {
+            "command": "wide-search-mcp",
+            "args": [],
+            "cwd": "/home/nerostar",
+            "env": {}
+        }
+    }
+}
