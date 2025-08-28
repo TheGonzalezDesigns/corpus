@@ -12,5 +12,6 @@
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "wide-search"
-  ]
+  ],
+  "outputStyle": "default"
 }
