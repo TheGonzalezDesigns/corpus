@@ -1,3 +1,25 @@
+// THEORY:
+// This Rust module serves as the high-performance bridge between the Corpus AI
+// companion's Python ecosystem and the Waldo Vision computer vision engine.
+// It embodies the "performance-critical path" principle, where the most
+// computationally intensive operations (frame analysis) are implemented in
+// Rust for maximum efficiency.
+//
+// The module solves the fundamental challenge of real-time video analysis:
+// processing 30 frames per second with sub-millisecond latency while making
+// intelligent decisions about when to trigger expensive AI analysis.
+//
+// Key Design Principles:
+// - Lazy initialization (configure Waldo Vision with actual frame dimensions)
+// - Scene state-based triggering (DISTURBED events only for reduced sensitivity)
+// - Intelligent cooldowns (prevent API spam during rapid state changes)
+// - Error resilience (graceful handling of dimension mismatches)
+// - PyO3 integration (seamless Python interoperability)
+//
+// This module transforms raw video streams into actionable intelligence,
+// enabling the AI companion to respond meaningfully to environmental changes
+// while maintaining exceptional cost efficiency through smart filtering.
+
 use pyo3::prelude::*;
 use waldo_vision::pipeline::{VisionPipeline, PipelineConfig, Report};
 
