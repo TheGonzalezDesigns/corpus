@@ -6,7 +6,12 @@
       "Bash(source:*)",
       "Bash(python:*)",
       "mcp__wide-search__search",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(maturin develop:*)",
+      "Bash(curl:*)",
+      "Bash(for i in {0..5})",
+      "Bash(do python3:*)",
+      "Bash(done)"
     ]
   },
   "enableAllProjectMcpServers": true,
