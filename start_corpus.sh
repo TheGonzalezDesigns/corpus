@@ -29,7 +29,21 @@
 # - No backup/recovery if configuration APIs fail during setup
 
 echo "🤖 Starting Corpus AI Companion System..."
+echo "(loading environment from .env if present)"
 echo "========================================"
+
+# Load environment variables
+if [ -f ./.env ]; then
+    set -a
+    # shellcheck disable=SC1091
+    . ./.env
+    set +a
+fi
+
+# Ensure compatibility: mirror GOOGLE_API_KEY from GEMINI_API_KEY if needed
+if [ -n "$GEMINI_API_KEY" ] && [ -z "$GOOGLE_API_KEY" ]; then
+    export GOOGLE_API_KEY="$GEMINI_API_KEY"
+fi
 
 # Function to kill existing services
 cleanup_services() {
@@ -97,7 +111,12 @@ main() {
     echo "👁️  Starting Vision API (Waldo Vision)..."
     cd capabilities/vision
     source venv/bin/activate
-    GEMINI_API_KEY=$GOOGLE_API_KEY python app_swagger.py &
+    # Ensure raw WebSocket server dependency is available
+    pip install -q websockets >/dev/null 2>&1 || true
+    # Vision API uses GEMINI_API_KEY; ensure env is present
+    [ -n "$GEMINI_API_KEY" ] || export GEMINI_API_KEY="$GOOGLE_API_KEY"
+    [ -n "$GOOGLE_API_KEY" ] || export GOOGLE_API_KEY="$GEMINI_API_KEY"
+    python app_swagger.py &
     VISION_PID=$!
     cd ../..
     
@@ -115,6 +134,9 @@ main() {
     wait_for_service "http://localhost:5001/status" "Speech API" || exit 1
     wait_for_service "http://localhost:5002/status" "Vision API" || exit 1  
     wait_for_service "http://localhost:5000/status" "Orchestrator" || exit 1
+    
+    # Inform orchestrator about current capability availability
+    curl -s -X POST "http://localhost:5000/capabilities/check" >/dev/null || true
     
     # Step 6: Configure optimal settings
     echo ""
@@ -146,6 +168,7 @@ main() {
     echo "Real-time monitoring:"
     echo "  📊 Monitor logs:   tail -f /home/nerostar/Projects/corpus/waldo_vision.log"
     echo "  📈 Performance:    curl http://raspberrypi:5002/monitor/status"
+    echo "  🔌 Live events WS: ws://raspberrypi:${LOG_WS_PORT:-5010}"
     echo ""
     echo "Control:"
     echo "  ⏹️  Stop all:       curl -X POST http://raspberrypi:5002/monitor/stop"

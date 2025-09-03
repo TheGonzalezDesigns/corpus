@@ -41,6 +41,11 @@ class PipelineOrchestrator:
         self.capabilities: Dict[str, Capability] = {}
         self.pipelines: Dict[str, Pipeline] = {}
         self._initialize_capabilities()
+        # Prepare an event loop if needed for background checks
+        try:
+            asyncio.get_event_loop()
+        except RuntimeError:
+            asyncio.set_event_loop(asyncio.new_event_loop())
         
     def _load_config(self, config_path: str) -> Dict[str, Any]:
         try:
@@ -91,6 +96,10 @@ class PipelineOrchestrator:
             for name in self.capabilities.keys()
         ]
         await asyncio.gather(*tasks)
+
+    def is_capability_available(self, name: str) -> bool:
+        cap = self.capabilities.get(name)
+        return bool(cap and cap.status == CapabilityStatus.ONLINE)
     
     def speak(self, text: str) -> bool:
         """Direct speech API call"""
@@ -98,6 +107,11 @@ class PipelineOrchestrator:
             logging.error("Speech capability not configured")
             return False
             
+        # Skip if speech capability is not available
+        if not self.is_capability_available('speech'):
+            logging.warning("Speech capability unavailable; skipping speak()")
+            return False
+
         capability = self.capabilities['speech']
         try:
             response = requests.post(
@@ -116,6 +130,11 @@ class PipelineOrchestrator:
             logging.error("Vision capability not configured")
             return None
             
+        # Skip if vision capability is not available (e.g., no camera)
+        if not self.is_capability_available('vision'):
+            logging.warning("Vision capability unavailable; skipping description fetch")
+            return None
+
         capability = self.capabilities['vision']
         try:
             response = requests.post(f"{capability.url}/analyze", timeout=30)
@@ -163,6 +182,14 @@ class PipelineOrchestrator:
     def pipe_vision_to_speech(self, config: Dict[str, Any] = None) -> bool:
         """Single vision→speech pipeline execution"""
         try:
+            # Ensure capabilities are available before attempting pipeline
+            if not self.is_capability_available('vision'):
+                logging.info("Skipping pipeline: vision unavailable (no camera or service offline)")
+                return False
+            if not self.is_capability_available('speech'):
+                logging.info("Skipping pipeline: speech unavailable")
+                return False
+
             # Get vision description
             description = self.get_vision_description()
             if not description:
@@ -220,7 +247,7 @@ class PipelineOrchestrator:
                     pipeline.stats['successes'] += 1
                     logging.info(f"Pipeline {pipeline.id} executed successfully")
                 else:
-                    logging.warning(f"Pipeline {pipeline.id} execution failed")
+                    logging.warning(f"Pipeline {pipeline.id} execution skipped/failed (check capability availability)")
                 
                 # Wait for next execution
                 time.sleep(interval)
