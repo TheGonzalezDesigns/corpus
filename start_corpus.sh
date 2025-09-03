@@ -138,6 +138,32 @@ wait_for_service() {
     return 1
 }
 
+# API health checks across services
+api_health_checks() {
+    echo "\n🧪 Running API health checks..."
+
+    # Speech checks
+    echo "-- Speech API --"
+    curl -sS http://localhost:5001/status >/dev/null && echo "✅ /status" || echo "❌ /status"
+    curl -sS http://localhost:5001/current >/dev/null && echo "✅ /current" || echo "⚠️  /current"
+    curl -sS http://localhost:5001/voices >/dev/null && echo "✅ /voices" || echo "⚠️  /voices"
+
+    # Vision checks
+    echo "-- Vision API --"
+    curl -sS http://localhost:5002/status >/dev/null && echo "✅ /status" || echo "❌ /status"
+    curl -sS http://localhost:5002/events/recent?limit=1 >/dev/null && echo "✅ /events/recent" || echo "⚠️  /events/recent"
+    curl -sS http://localhost:5002/events/context?window=60&limit=1 >/dev/null && echo "✅ /events/context" || echo "⚠️  /events/context"
+    curl -sS http://localhost:5002/camera/status >/dev/null && echo "✅ /camera/status" || echo "⚠️  /camera/status"
+
+    # Orchestrator checks
+    echo "-- Orchestrator API --"
+    curl -sS http://localhost:5000/status >/dev/null && echo "✅ /status" || echo "❌ /status"
+    curl -sS -X POST http://localhost:5000/capabilities/check >/dev/null && echo "✅ /capabilities/check" || echo "⚠️  /capabilities/check"
+    curl -sS http://localhost:5000/pipeline/status >/dev/null && echo "✅ /pipeline/status" || echo "⚠️  /pipeline/status"
+
+    echo "✅ Health checks complete"
+}
+
 # Main startup sequence
 main() {
     cd /home/nerostar/Projects/corpus
@@ -210,7 +236,7 @@ main() {
     echo "🦀 Starting Waldo Vision continuous monitoring..."
     curl -s -X POST "http://localhost:5002/monitor/start" >/dev/null
     echo "👁️  Event-driven monitoring ACTIVE"
-    
+
     # Step 8: Display status
     echo ""
     echo "🎉 Corpus AI Companion is READY!"
@@ -231,6 +257,9 @@ main() {
     echo ""
     echo "💡 Your AI companion is watching and will speak when significant changes occur!"
     echo "   Try walking into the camera view to trigger DISTURBED state detection."
+
+    # Step 9: API health checks
+    api_health_checks
     
     # Keep script running to monitor
     echo ""
