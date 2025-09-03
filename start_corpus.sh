@@ -45,6 +45,58 @@ if [ -n "$GEMINI_API_KEY" ] && [ -z "$GOOGLE_API_KEY" ]; then
     export GOOGLE_API_KEY="$GEMINI_API_KEY"
 fi
 
+# Preflight checks
+check_prereqs() {
+    echo "\n🧪 Running preflight checks..."
+
+    local ok=1
+
+    # Tools
+    for tool in curl lsof; do
+        if ! command -v "$tool" >/dev/null 2>&1; then
+            echo "⚠️  Missing tool: $tool (please install)"
+        fi
+    done
+
+    # Env vars (critical)
+    if [ -z "$HUME_API_KEY" ]; then
+        echo "⚠️  HUME_API_KEY not set — speech will fall back to pyttsx3"
+    else
+        echo "✅ HUME_API_KEY present"
+    fi
+    if [ -z "$GEMINI_API_KEY" ] && [ -z "$GOOGLE_API_KEY" ]; then
+        echo "❌ GEMINI_API_KEY/GOOGLE_API_KEY not set — vision analysis will be unavailable"
+        ok=0
+    else
+        echo "✅ Gemini key present"
+    fi
+
+    # Optional provider keys
+    [ -n "$OPENAI_API_KEY" ] && echo "✅ OpenAI key present" || echo "ℹ️  OPENAI_API_KEY not set (optional)"
+    [ -n "$ANTHROPIC_API_KEY" ] && echo "✅ Anthropic key present" || echo "ℹ️  ANTHROPIC_API_KEY not set (optional)"
+
+    # Virtual envs
+    if [ ! -d capabilities/speech/venv ]; then
+        echo "⚠️  Speech venv missing: capabilities/speech/venv"
+    fi
+    if [ ! -d capabilities/vision/venv ]; then
+        echo "⚠️  Vision venv missing: capabilities/vision/venv"
+    fi
+
+    # Warn if ports busy
+    for port in 5001 5002 5000 ${LOG_WS_PORT:-5010}; do
+        if lsof -i:"$port" >/dev/null 2>&1; then
+            echo "⚠️  Port $port appears in use"
+        fi
+    done
+
+    if [ "$ok" -eq 0 ]; then
+        echo "\n❌ Preflight failed — fix issues above and re-run."
+        exit 1
+    fi
+    echo "✅ Preflight OK"
+}
+
 # Function to kill existing services
 cleanup_services() {
     echo "🛑 Stopping existing services..."
@@ -90,6 +142,9 @@ wait_for_service() {
 main() {
     cd /home/nerostar/Projects/corpus
     
+    # Step 0: Preflight checks
+    check_prereqs
+
     # Step 1: Cleanup
     cleanup_services
     check_port 5001
