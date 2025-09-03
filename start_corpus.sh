@@ -267,7 +267,8 @@ main() {
     # Keep script running to monitor
     echo ""
     echo "Press Ctrl+C to stop all services..."
-    trap cleanup_and_exit SIGINT
+    # On Ctrl+C, delegate to stop script for a thorough cleanup
+    trap 'echo; ./stop_corpus.sh; echo "👋 Goodbye!"; exit 0' SIGINT
     
     while true; do
         sleep 10
