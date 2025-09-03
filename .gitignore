@@ -73,4 +73,4 @@ Cargo.lock
 *.rlib
 *.pdb
 
-./.claude/
+.claude/
