@@ -3,6 +3,7 @@ from flask_restx import Api, Resource, fields
 import logging
 import yaml
 from pipeline_orchestrator import PipelineOrchestrator
+import asyncio
 
 app = Flask(__name__)
 api = Api(app,
@@ -227,6 +228,29 @@ class Capabilities(Resource):
                 'Emotional context enhancement'
             ]
         }
+
+@api.route('/capabilities/check')
+class CapabilitiesCheck(Resource):
+    @api.response(200, 'Success')
+    @api.response(500, 'Internal Server Error')
+    def post(self):
+        """Probe all capability services and update availability in orchestrator"""
+        try:
+            try:
+                # Prefer a fresh loop in this context to avoid nested loop errors
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                loop.run_until_complete(orchestrator.check_all_capabilities())
+                loop.close()
+            except Exception:
+                # Fallback
+                asyncio.run(orchestrator.check_all_capabilities())
+            return {
+                'message': 'Capability check complete',
+                'status': orchestrator.get_system_status()
+            }
+        except Exception as e:
+            return {'error': f'Capability check failed: {str(e)}'}, 500
 
 # Clean up on shutdown
 import atexit
