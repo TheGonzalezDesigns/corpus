@@ -74,3 +74,6 @@ Cargo.lock
 *.pdb
 
 .claude/
+
+waldo_vision.log.*
+vision_events*.jsonl
