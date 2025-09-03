@@ -261,15 +261,18 @@ main() {
     if curl -sS -H 'Content-Type: application/json' -X POST http://localhost:5000/pipeline/execute -d '{}' >/dev/null; then echo "✅ Orchestrator pipeline execute"; else echo "⚠️  Orchestrator pipeline execute failed"; fi
     if curl -sS -H 'Content-Type: application/json' -X POST http://localhost:5001/speak -d '{"text":"Health check: speech OK."}' >/dev/null; then echo "✅ Speech speak"; else echo "⚠️  Speech speak failed"; fi
 
-    # Step 9: API health checks
-    api_health_checks
-    
+    # Step 10: Start Waldo Vision monitoring (after health checks)
+    echo ""
+    echo "🦀 Starting Waldo Vision continuous monitoring..."
+    curl -s -X POST "http://localhost:5002/monitor/start" >/dev/null
+    echo "👁️  Event-driven monitoring ACTIVE"
+
     # Keep script running to monitor
     echo ""
     echo "Press Ctrl+C to stop all services..."
     # On Ctrl+C, delegate to stop script for a thorough cleanup
     trap 'echo; ./stop_corpus.sh; echo "👋 Goodbye!"; exit 0' SIGINT
-    
+
     while true; do
         sleep 10
         # Check if services are still running
@@ -286,11 +289,7 @@ main() {
             break
         fi
     done
-    # Step 10: Start Waldo Vision monitoring (after health checks)
-    echo ""
-    echo "🦀 Starting Waldo Vision continuous monitoring..."
-    curl -s -X POST "http://localhost:5002/monitor/start" >/dev/null
-    echo "👁️  Event-driven monitoring ACTIVE"
+    # If loop breaks, fall through and exit
 }
 
 cleanup_and_exit() {
