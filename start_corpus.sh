@@ -260,6 +260,15 @@ main() {
 
     # Step 9: API health checks
     api_health_checks
+
+    # Step 10: Extended checks (non-fatal)
+    echo "\n(Extended checks)"
+    if curl -sS -X POST http://localhost:5002/analyze >/dev/null; then echo "✅ Vision analyze"; else echo "⚠️  Vision analyze failed"; fi
+    if curl -sS -H 'Content-Type: application/json' -X POST http://localhost:5000/pipeline/execute -d '{}' >/dev/null; then echo "✅ Orchestrator pipeline execute"; else echo "⚠️  Orchestrator pipeline execute failed"; fi
+    if curl -sS -H 'Content-Type: application/json' -X POST http://localhost:5001/speak -d '{"text":"Health check: speech OK."}' >/dev/null; then echo "✅ Speech speak"; else echo "⚠️  Speech speak failed"; fi
+
+    # Step 9: API health checks
+    api_health_checks
     
     # Keep script running to monitor
     echo ""
