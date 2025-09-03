@@ -268,7 +268,11 @@ impl FrameChangeDetector {
 }
 
 impl FrameChangeDetector {
-    /// Decode base64 JPEG to raw grayscale buffer for Waldo Vision
+    /// Decode base64 JPEG to raw RGBA buffer for Waldo Vision
+    ///
+    /// Note: Waldo Vision grid processing expects 4-channel RGBA data
+    /// with length width * height * 4. Using grayscale (1-channel)
+    /// causes subtle off-by-N indexing issues at chunk boundaries.
     fn decode_frame(&self, frame_b64: &str) -> Result<(Vec<u8>, u32, u32), String> {
         use base64::{Engine as _, engine::general_purpose::STANDARD};
         
@@ -276,14 +280,14 @@ impl FrameChangeDetector {
         let img_data = STANDARD.decode(frame_b64)
             .map_err(|e| format!("Base64 decode error: {}", e))?;
         
-        // Load image and convert to grayscale for Waldo Vision
+        // Load image and convert to RGBA for Waldo Vision
         let img = image::load_from_memory(&img_data)
             .map_err(|e| format!("Image load error: {}", e))?;
-        let gray_img = img.to_luma8();
-        let (width, height) = gray_img.dimensions();
+        let rgba_img = img.to_rgba8();
+        let (width, height) = rgba_img.dimensions();
         
-        // Return pixels with actual dimensions
-        Ok((gray_img.into_raw(), width, height))
+        // Return pixels with actual dimensions (RGBA = 4 bytes per pixel)
+        Ok((rgba_img.into_raw(), width, height))
     }
 }
 
