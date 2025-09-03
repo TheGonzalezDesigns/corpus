@@ -20,6 +20,15 @@
 // enabling the AI companion to respond meaningfully to environmental changes
 // while maintaining exceptional cost efficiency through smart filtering.
 
+// CAVEATS & WARNINGS:
+// - Lazy pipeline initialization may cause first frame processing delays
+// - Scene state transitions depend on Waldo Vision's internal thresholds (not fully tunable)
+// - Buffer overflow protection may skip frames with unexpected dimensions
+// - Cooldown logic is hardcoded (1s volatile, 0.25s disturbed) - needs API configuration
+// - Error handling in PyO3 conversion may mask underlying Waldo Vision issues
+// - No persistence between restarts (scene learning resets on each startup)
+// - Dimension mismatch handling is defensive but doesn't fix root cause
+
 use pyo3::prelude::*;
 use waldo_vision::pipeline::{VisionPipeline, PipelineConfig, Report};
 
