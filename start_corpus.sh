@@ -231,13 +231,7 @@ main() {
     curl -s -X POST "http://localhost:5001/voice?voice_name=Ito" >/dev/null
     echo "🗣️  Voice set: Ito"
     
-    # Step 7: Start Waldo Vision monitoring
-    echo ""
-    echo "🦀 Starting Waldo Vision continuous monitoring..."
-    curl -s -X POST "http://localhost:5002/monitor/start" >/dev/null
-    echo "👁️  Event-driven monitoring ACTIVE"
-
-    # Step 8: Display status
+    # Step 7: Display status
     echo ""
     echo "🎉 Corpus AI Companion is READY!"
     echo "================================="
@@ -258,10 +252,10 @@ main() {
     echo "💡 Your AI companion is watching and will speak when significant changes occur!"
     echo "   Try walking into the camera view to trigger DISTURBED state detection."
 
-    # Step 9: API health checks
+    # Step 8: API health checks
     api_health_checks
 
-    # Step 10: Extended checks (non-fatal)
+    # Step 9: Extended checks (non-fatal)
     echo "\n(Extended checks)"
     if curl -sS -X POST http://localhost:5002/analyze >/dev/null; then echo "✅ Vision analyze"; else echo "⚠️  Vision analyze failed"; fi
     if curl -sS -H 'Content-Type: application/json' -X POST http://localhost:5000/pipeline/execute -d '{}' >/dev/null; then echo "✅ Orchestrator pipeline execute"; else echo "⚠️  Orchestrator pipeline execute failed"; fi
@@ -291,6 +285,11 @@ main() {
             break
         fi
     done
+    # Step 10: Start Waldo Vision monitoring (after health checks)
+    echo ""
+    echo "🦀 Starting Waldo Vision continuous monitoring..."
+    curl -s -X POST "http://localhost:5002/monitor/start" >/dev/null
+    echo "👁️  Event-driven monitoring ACTIVE"
 }
 
 cleanup_and_exit() {
