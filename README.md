@@ -2,7 +2,7 @@
 
 A modular AI companion system for Raspberry Pi that provides comprehensive sensory and cognitive capabilities.
 
-**✅ FULLY OPERATIONAL** - Event-driven AI companion with emotional intelligence and cost-optimized processing.
+**⚠️ EARLY ALPHA** — Moderate tracking and description capabilities; active development.
 
 ## Overview
 
@@ -42,7 +42,7 @@ Each capability module exposes standardized APIs that the main system coordinate
 
 ## Current Status
 
-✅ **FULLY OPERATIONAL** - Advanced AI companion with:
+✅ Current Alpha Capabilities:
 - **Emotional Speech**: Hume TTS with 101+ voice personalities  
 - **Intelligent Vision**: Waldo Vision multi-layer scene analysis
 - **Event-driven Responses**: Automatic reactions to environmental changes
@@ -76,3 +76,9 @@ cd corpus
 - Any USB camera supported by OpenCV
 - Optimal: 640×480 @ 30fps for real-time processing
 - Waldo Vision auto-configures to camera capabilities
+
+New in this alpha:
+- **Provider routing** for vision (Gemini → OpenAI → Claude) with automatic failover
+- **Live event logs** via WebSocket: `ws://<host>:5010` (raw JSON stream)
+- **Capability probe** endpoint in orchestrator: `POST /capabilities/check`
+- **Stability fixes** in Waldo filter (RGBA pipeline)
