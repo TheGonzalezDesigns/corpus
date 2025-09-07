@@ -21,7 +21,16 @@ Each capability is an isolated, upgradeable API component that can be seamlessly
 - **Continuous Visual Stream** - Non-stop environment monitoring
 - **Object Tracking** - Follow and describe moving objects
 - **Scene Change Detection** - React to environmental changes
-- **Visual Memory** - Remember and reference previously seen objects/people
+- **Debounced Event Windows** - Aggregate rapid triggers and summarize once ✅
+- **Event Memory (JSONL)** - Persist time-stamped summaries for context ✅
+- **Provider Routing** - Gemini→OpenAI→Claude with failover ✅
+- **Live Telemetry (WS)** - Raw WebSocket on dedicated port ✅
+
+### 🗣️ **Speech Aggregation & Budgets (Planned)**
+- **Multi-Provider Fallback Chain** – Hume → ElevenLabs → Azure → GCP → Polly → local
+- **Configurable Monthly Caps** – Rotate before hitting hard limits; avoid outages
+- **Provider Health & Status** – /speech/providers/status to view active provider/usage
+- **Runtime Order Control** – /speech/providers/set to adjust priorities on the fly
 
 ---
 
@@ -37,6 +46,7 @@ Each capability is an isolated, upgradeable API component that can be seamlessly
 - **Conversational Memory** - Remember ongoing conversations across sessions
 - **Learning Preferences** - Adapt to your communication style and interests
 - **Situation Awareness** - Understand context from vision + conversation
+- **Novelty-Aware Prompting** - Avoid repeating obvious details; prioritize deltas (Planned)
 - **Proactive Assistance** - Offer help based on observed situations
 
 ---
