@@ -257,6 +257,31 @@ main() {
 
     # Step 9: Extended checks (non-fatal)
     echo "\n(Extended checks)"
+    # Ingest: force start and confirm connection (soft gate)
+    echo "🔌 Ensuring ingest is running and connected…"
+    curl -sS -X POST http://localhost:5002/ingest/start >/dev/null || true
+    if curl -sS http://localhost:5002/ingest/status >/dev/null; then
+        attempts=0
+        while true; do
+            status_json=$(curl -sS http://localhost:5002/ingest/status)
+            connected=$(printf "%s" "$status_json" | sed -n 's/.*"connected":\s*\(true\|false\).*/\1/p')
+            sent=$(printf "%s" "$status_json" | sed -n 's/.*"sent_count":\s*\([0-9]*\).*/\1/p')
+            url=$(printf "%s" "$status_json" | sed -n 's/.*"url":\s*"\([^"]*\)".*/\1/p')
+            if [ "$connected" = "true" ]; then
+                echo "✅ Ingest connected to $url (sent=$sent)"
+                break
+            fi
+            attempts=$((attempts+1))
+            if [ $attempts -ge 20 ]; then
+                last_error=$(printf "%s" "$status_json" | sed -n 's/.*"last_error":\s*"\([^"]*\)".*/\1/p')
+                echo "⚠️  Ingest not connected after 20s (continuing). Last error: ${last_error:-none}"
+                break
+            fi
+            sleep 1
+        done
+    else
+        echo "⚠️  Ingest status endpoint unavailable"
+    fi
     if curl -sS -X POST http://localhost:5002/analyze >/dev/null; then echo "✅ Vision analyze"; else echo "⚠️  Vision analyze failed"; fi
     if curl -sS -H 'Content-Type: application/json' -X POST http://localhost:5000/pipeline/execute -d '{}' >/dev/null; then echo "✅ Orchestrator pipeline execute"; else echo "⚠️  Orchestrator pipeline execute failed"; fi
     if curl -sS -H 'Content-Type: application/json' -X POST http://localhost:5001/speak -d '{"text":"Health check: speech OK."}' >/dev/null; then echo "✅ Speech speak"; else echo "⚠️  Speech speak failed"; fi
