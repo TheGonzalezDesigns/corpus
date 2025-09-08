@@ -21,6 +21,15 @@ Each capability is an **isolated, upgradeable API service** that follows Unix pi
 Camera → Vision API → Gemini Analysis → Description → Speech API → Hume TTS → Audio Output
 ```
 
+### **Debounced Event Windows (Alpha)**
+```
+Camera → Waldo Vision filter → [Aggregate triggers ≤ 4s or 250ms quiet]
+       └─► On window close: summarize once (provider-routed) → Speech once
+       └─► Persist JSONL event (ts, duration, frames_count, description)
+       └─► Broadcast waldo_event over raw WebSocket (port 5010)
+```
+
+
 ### **Enhanced Pipeline: Multi-Modal Processing**
 ```
 Camera ─┐
@@ -36,6 +45,18 @@ Audio ──┘                                   ↑
 Continuous:  Vision Stream ──→ Analysis Stream ──→ Speech Stream ──→ Audio Stream
 Control:     REST APIs     ──→ Configuration   ──→ Session Mgmt  ──→ Status
 ```
+
+### Ingest Streaming & WS Digest (Current)
+- Vision streams every processed frame (JPEG) to a remote EC2 WebSocket `INGEST_WS_URL`.
+- A raw WebSocket hub (`ws://<host>:5010`, configurable with `LOG_WS_PORT`) broadcasts:
+  - Real-time log/events (waldo_*)
+  - A periodic ingest digest every ~2s with connection state and counters.
+
+Vision Ingest Endpoints (Swagger at `http://raspberrypi:5002/swagger`):
+- `GET /ingest/status` — connection state, `sent_count`, `queue_size`, `last_error`, `url`
+- `POST /ingest/start` — start ingest worker and enable WS digest
+- `POST /ingest/stop` — stop ingest worker and WS digest
+- `POST /ingest/config` — set ingest URL at runtime (auto-restarts)
 
 ---
 
