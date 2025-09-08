@@ -25,6 +25,8 @@ Each capability is an isolated, upgradeable API component that can be seamlessly
 - **Event Memory (JSONL)** - Persist time-stamped summaries for context ✅
 - **Provider Routing** - Gemini→OpenAI→Claude with failover ✅
 - **Live Telemetry (WS)** - Raw WebSocket on dedicated port ✅
+- **Ingest Streaming** - Push every processed frame to EC2 via WS ✅
+- **WS Digest** - Periodic ingest heartbeat over raw WS ✅
 
 ### 🗣️ **Speech Aggregation & Budgets (Planned)**
 - **Multi-Provider Fallback Chain** – Hume → ElevenLabs → Azure → GCP → Polly → local
